@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ms" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Pengguna - HBH PMTG</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            --primary-color: #0f766e;
+            --primary-hover: #0d9488;
+            --primary-light: #f0fdfa;
+            --secondary-color: #6366f1;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #131b2e;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #1e293b;
+            --primary-color: #14b8a6;
+            --primary-hover: #2dd4bf;
+            --primary-light: rgba(20, 184, 166, 0.1);
+            --secondary-color: #818cf8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .layout-container {
+            display: flex;
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            gap: 2rem;
+        }
+
+        .nav-sidebar {
+            width: 280px;
+            position: sticky;
+            top: 90px;
+            height: calc(100vh - 120px);
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .nav-sidebar h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: var(--bg-primary);
+            color: var(--primary-color);
+        }
+
+        .content-main {
+            flex: 1;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .manual-section {
+            margin-bottom: 3.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .manual-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .manual-section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .manual-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .step-list {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .step-list li {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .step-list li strong {
+            color: var(--primary-color);
+        }
+
+        .image-box {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 1.5rem 0;
+            text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .image-caption {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .alert-info {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-primary);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .alert-info i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+
+        /* Print styles */
+        @media print {
+            header, .nav-sidebar, .btn {
+                display: none !important;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .layout-container {
+                margin: 0;
+                padding: 0;
+                display: block;
+            }
+
+            .content-main {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .manual-section {
+                page-break-inside: avoid;
+                margin-bottom: 2rem;
+                padding-bottom: 1.5rem;
+            }
+
+            .image-box {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <h1>Manual Pengguna Sistem HBH PMTG</h1>
+            <p>Hari Bekerja Harian - Politeknik METrO Tasek Gelugor</p>
+        </div>
+        <div class="header-actions">
+            <button id="theme-toggle" class="btn btn-secondary"><i class="fa-solid fa-moon"></i> Mod</button>
+            <button onclick="window.print()" class="btn btn-primary"><i class="fa-solid fa-print"></i> Cetak / Simpan PDF</button>
+        </div>
+    </header>
+
+    <div class="layout-container">
+        <!-- Sidebar Navigation -->
+        <nav class="nav-sidebar">
+            <h3>Panduan Manual</h3>
+            <ul class="nav-links">
+                <li><a href="#pengenalan">1. Pengenalan & Mula</a></li>
+                <li><a href="#tetapan">2. Profil, Peranan & Jadual</a></li>
+                <li><a href="#mengisi">3. Mengisi Log BDR</a></li>
+                <li><a href="#cetak-harian">4. Cetakan Laporan Harian</a></li>
+                <li><a href="#cetak-bulanan">5. Cetakan Laporan Bulanan</a></li>
+                <li><a href="#migrasi">6. Migrasi Pejabat ke Rumah</a></li>
+                <li><a href="#panduan-pdf">7. Panduan Cetak A4 PDF</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content-main">
+            <!-- Section 1 -->
+            <section id="pengenalan" class="manual-section">
+                <h2><i class="fa-solid fa-circle-play"></i> 1. Pengenalan & Memulakan Sistem</h2>
+                <p>Sistem <strong>HBH PMTG</strong> (Hari Bekerja Harian) dibina khusus untuk menyelaraskan catatan harian Bekerja Dari Rumah (BDR) bagi pensyarah dan kakitangan Politeknik METrO Tasek Gelugor pada setiap hari Selasa dan Khamis.</p>
+                <p>Sistem ini berfungsi secara <em>Local-first</em> di mana semua data yang dimasukkan disimpan secara selamat di dalam memori pelayar web (browser) komputer anda sendiri.</p>
+                <div class="alert-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Langkah Mula:</strong> Pergi ke folder <code>E:\antigraviti\sistem BDR</code> dan klik fail <strong><code>run.bat</code></strong>. Sistem akan melancarkan pelayan mini dan membuka pelayar Chrome/Edge secara automatik.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2 -->
+            <section id="tetapan" class="manual-section">
+                <h2><i class="fa-solid fa-address-card"></i> 2. Mengisi Profil, Peranan & Jadual Waktu</h2>
+                <p>Sebelum memulakan pengisian log harian, anda perlu menetapkan profil peribadi, peranan kerja anda, serta jadual waktu kuliah jika anda adalah seorang pensyarah:</p>
+                
+                <h3 style="font-size: 1.05rem; margin-top: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-color);"><i class="fa-solid fa-user-tag"></i> 2.1 Maklumat Peribadi & Tandatangan Digital</h3>
+                <ul class="step-list">
+                    <li>Pergi ke tab <strong>Tetapan & T/Tangan</strong> pada menu tepi.</li>
+                    <li>Sahkan nama penuh (contoh: <strong>MOHD AZRULNIZAM BIN MOHD KAMARUDIN</strong>), jawatan, jabatan, dan nama <strong>Ketua Jabatan</strong> yang akan mengesahkan laporan anda.</li>
+                    <li>Klik butang <strong>Simpan Maklumat</strong>.</li>
+                    <li>Pada kotak tandatangan, lakar tandatangan anda menggunakan tetikus (mouse) atau skrin sentuh (touchscreen) dan klik **Simpan Tandatangan**. Ia akan disimpan secara kekal dan dimasukkan secara automatik ke dalam semua cetakan laporan.</li>
+                </ul>
+
+                <h3 style="font-size: 1.05rem; margin-top: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-color);"><i class="fa-solid fa-user-gear"></i> 2.2 Pilihan Peranan: Pensyarah vs Kakitangan Pentadbiran</h3>
+                <ul class="step-list">
+                    <li>Di bawah bahagian <strong>Konfigurasi Peranan & Jadual Waktu BDR</strong>, terdapat pilihan kotak tick <strong>"Adakah anda Pensyarah?"</strong>.</li>
+                    <li><strong>Jika anda Pensyarah (Ditik)</strong>: Sistem akan mengaktifkan slot jadual waktu kuliah automatik pada hari Selasa dan Khamis dalam log harian anda.</li>
+                    <li><strong>Jika anda Kakitangan Pentadbiran (Nyah-tik)</strong>: Sistem akan mematikan fungsi pengisian kelas automatik. Semua jam bekerja dari 8:00 AM - 5:00 PM akan dikosongkan untuk membolehkan pengisian log aktiviti pentadbiran biasa secara manual.</li>
+                </ul>
+
+                <h3 style="font-size: 1.05rem; margin-top: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-color);"><i class="fa-solid fa-keyboard"></i> 2.3 Pembina & Editor Jadual Kuliah Secara Manual</h3>
+                <div style="background-color: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.5; color: #1e293b;">
+                    <strong>ℹ️ Pengguguran Fungsi Muat Naik Fail:</strong><br>
+                    Bagi mengelakkan ralat imbasan (OCR) disebabkan susun atur fail jadual yang berbeza-beza antara pensyarah, fungsi muat naik fail jadual (CSV/Gambar/PDF) telah dialih keluar sepenuhnya. Sistem kini memfokuskan kepada <strong>isian terus secara manual</strong> di dalam grid waktu bawah yang 100% tepat, stabil, dan selamat.
+                </div>
+                <p>Anda boleh membina dan mengubah suai jadual kuliah anda secara terus dalam sistem di bawah mod Pensyarah:</p>
+                <ul class="step-list">
+                    <li>Di bawah ruangan <strong>Edit Jadual Kuliah Secara Manual</strong>, anda akan melihat grid input jam kuliah untuk hari **Selasa** dan **Khamis** (8:00 AM hingga 5:00 PM).</li>
+                    <li>Taipkan butiran subjek, kelas, dan bilik pada slot jam yang berkenaan (contoh: <code>DFC10353 - Programming Fundamentals (DIT1B) [Amali - LAB2]</code>), dan biarkan kosong bagi slot jam yang tiada kuliah.</li>
+                    <li>Klik **Simpan Jadual Waktu** untuk mengaktifkan jadual kuliah tersuai tersebut.</li>
+                    <li>Klik **Kosongkan Jadual** untuk memadam semua input jadual anda sekarang.</li>
+                    <li>Klik **Reset Jadual Asal** jika anda ingin memadam tetapan tersuai dan mengembalikan jadual waktu kepada jadual asal Mohd Azrulnizam.</li>
+                </ul>
+                <div class="image-box">
+                    <img src="timetable.png" alt="Pratonton Tetapan Jadual Waktu BDR">
+                    <div class="image-caption">Rajah 2.1: Paparan bahagian konfigurasi peranan dan editor jadual waktu kuliah manual.</div>
+                </div>
+            </section>
+
+            <!-- Section 3 -->
+            <section id="mengisi" class="manual-section">
+                <h2><i class="fa-solid fa-pen-to-square"></i> 3. Mengisi Catatan Harian BDR</h2>
+                <p>Dashboard utama membolehkan anda mengisi dan menyimpan log aktiviti harian anda (waktu bekerja 8:00 AM - 5:00 PM):</p>
+                <ul class="step-list">
+                    <li>Pilih tarikh BDR harian anda pada ruangan <strong>Pilih Tarikh Catatan BDR</strong> (sistem menetapkan tarikh hari ini sebagai lalai).</li>
+                    <li>Jika tarikh yang dipilih ialah hari <strong>Selasa atau Khamis</strong>, jadual waktu kelas anda akan <strong>disuntik secara automatik</strong> pada slot jam yang betul. Anda hanya perlu menaip apa yang anda ajar pada ruangan catatan.</li>
+                    <li>Bagi jam-jam lain yang kosong, gunakan dropdown untuk memilih jenis tugasan (<em>Urusan Kerja ICT, Urusan Penyediaan PdP, Pembangunan Inovasi, atau Lain-lain</em>) dan masukkan catatan terperinci.</li>
+                    <li><strong>Lampiran Bukti Setiap Jam (Pilihan)</strong>: Di hujung setiap baris slot jam aktiviti, anda boleh memuat naik fail gambar bukti (PNG/JPG) atau video pendek (MP4/WebM) yang berukuran maksimum 2MB khusus untuk tugasan jam tersebut.</li>
+                    <li>Klik butang <strong>Simpan Log Harian</strong> di bucu kanan atas borang untuk menyimpan log. Lampiran bukti ini akan disertakan secara automatik di dalam baris aktiviti pada laporan bercetak!</li>
+                </ul>
+                
+                <div class="image-box">
+                    <img src="dashboard_inputs.png" alt="Borang Log Harian BDR">
+                    <div class="image-caption">Rajah 3.1: Paparan borang pengisian aktiviti harian BDR dengan prapengisian jadual kelas automatik.</div>
+                </div>
+            </section>
+
+            <!-- Section 4 -->
+            <section id="cetak-harian" class="manual-section">
+                <h2><i class="fa-solid fa-print"></i> 4. Mencetak Laporan Harian BDR</h2>
+                <p>Laporan harian dicetak mengikut format formal A4 rasmi institusi:</p>
+                <ul class="step-list">
+                    <li><strong>Cara A (Terus dari Dashboard)</strong>: Selepas mengisi dan menyimpan log, anda boleh terus menekan butang <strong>Cetak Harian</strong> di bucu kanan atas borang.</li>
+                    <li><strong>Cara B (Melalui tab Rekod & Cetakan)</strong>: Pilih tarikh laporan pada ruangan <strong>Pilih Tarikh Harian</strong>, kemudian klik butang <strong>Cetak Laporan Harian</strong>.</li>
+                    <li>Pelayar web anda akan membuka dialog cetakan. Anda boleh mencetak terus ke kertas atau menyimpan sebagai <strong>Save as PDF</strong>.</li>
+                </ul>
+                
+                <div class="image-box">
+                    <img src="print_daily.png" alt="Pratonton Cetakan Laporan Harian">
+                    <div class="image-caption">Rajah 4.1: Contoh hasil pratonton cetakan Laporan Harian BDR lengkap dengan kepala surat institusi dan tandatangan digital.</div>
+                </div>
+            </section>
+
+            <!-- Section 5 -->
+            <section id="cetak-bulanan" class="manual-section">
+                <h2><i class="fa-solid fa-file-invoice"></i> 5. Mencetak Laporan Bulanan Lengkap</h2>
+                <p>Laporan bulanan menyatukan helaian ringkasan bulanan (summary sheet) dan semua laporan harian bagi bulan tersebut ke dalam satu fail cetakan:</p>
+                <ul class="step-list">
+                    <li>Pergi ke tab <strong>Rekod & Cetakan</strong>.</li>
+                    <li>Di bawah bahagian **Cetakan Laporan Bulanan**, pilih bulan dan tahun pelaporan (contoh: <code>Ogos 2026</code>).</li>
+                    <li>Sistem akan memaparkan bilangan hari BDR yang telah direkodkan. Klik **Cetak Laporan Bulanan**.</li>
+                    <li>Sistem akan menjana satu dokumen komprehensif mengandungi halaman ringkasan bulanan di bahagian depan, diikuti lampiran helaian harian bagi setiap tarikh tersebut (dipisahkan secara halaman baharu menggunakan <em>page-break</em>).</li>
+                </ul>
+                
+                <div class="image-box">
+                    <img src="print_monthly.png" alt="Pratonton Cetakan Laporan Bulanan">
+                    <div class="image-caption">Rajah 5.1: Contoh halaman ringkasan (Summary Sheet) Laporan Bulanan sebelum helaian perperincian BDR harian dilampirkan.</div>
+                </div>
+            </section>
+
+            <!-- Section 6 -->
+            <section id="penyimpanan-awan" class="manual-section">
+                <h2><i class="fa-solid fa-cloud"></i> 6. Penyimpanan Awan Automatik (Firebase Cloud Sync)</h2>
+                <p>Dalam HBH PMTG V2.0, sistem disepadukan secara langsung dengan <strong>Google Firebase Cloud Database</strong> untuk membolehkan penyelarasan data log harian secara automatik merentasi semua peranti (Laptop, PC Pejabat, dan Telefon Bimbit):</p>
+                <ul class="step-list">
+                    <li><strong>Pendaftaran & Log Masuk</strong>: Klik butang <code>☁️ Log Masuk Awan</code> pada bar navigasi atas. Masukkan alamat emel dan katalaluan anda untuk mendaftar akaun baharu atau log masuk akaun sedia ada.</li>
+                    <li><strong>Penyelarasan Data Automatik (Auto-Sync)</strong>: Setiap kali anda menekan butang <strong>Simpan Log Harian</strong> atau mengemas kini maklumat profil di mana-mana komputer, data tersebut akan dihantar secara senyap dan selamat ke Awan Firebase.</li>
+                    <li><strong>Akses Dari Peranti Lain</strong>: Apabila anda membuka sistem di komputer atau telefon bimbit lain, cuma log masuk menggunakan emel yang sama. Semua rekod log BDR, profil, jadual waktu, dan tanda tangan digital anda akan dimuat turun serta-merta!</li>
+                    <li><strong>Pengasingan Data Akaun 100%</strong>: Setiap pengguna mempunyai ruang storan Awan berasingan (*User UID Isolation*). Pensyarah atau pengguna lain tidak boleh melihat atau mengusik data catatan anda.</li>
+                </ul>
+            </section>
+
+            <!-- Section 7 -->
+            <section id="muat-turun-apk" class="manual-section">
+                <h2><i class="fa-solid fa-mobile-screen-button"></i> 7. Aplikasi Mobile Android (.APK)</h2>
+                <p>Untuk memudahkan capaian dan pengisian log BDR di mana sahaja menggunakan telefon bimbit, aplikasi Android rasmi (.APK) telah disediakan:</p>
+                <ul class="step-list">
+                    <li><strong>Muat Turun APK</strong>: Anda boleh menekan butang <strong>Muat Turun APK Android</strong> pada bar navigasi atas atau menerusi kad di Dashboard Utama untuk memuat turun fail <code>HBH_PMTG_v2.apk</code>.</li>
+                    <li><strong>Pemasangan Di Telefon</strong>: Hantar fail <code>.apk</code> tersebut ke telefon bimbit anda dan tekan fail tersebut untuk memasang (Install). Jika skrin keselamatan telefon meminta kebenaran, pilih <em>Allow from this source / Allow installation</em>.</li>
+                    <li><strong>Penggunaan</strong>: Selepas dipasang, buka aplikasi HBH PMTG di telefon, klik butang <code>☁️ Log Masuk Awan</code> dan log masuk. Anda boleh menambah atau menyemak log BDR secara terus dari telefon bimbit anda!</li>
+                </ul>
+            </section>
+
+            <!-- Section 8 -->
+            <section id="migrasi" class="manual-section">
+                <h2><i class="fa-solid fa-file-export"></i> 8. Backup & Restore Manual (Fail JSON)</h2>
+                <p>Sebagai langkah keselamatan tambahan atau kegunaan tanpa talian internet (offline), anda juga boleh menggunakan fungsi backup manual berformat <code>.json</code>:</p>
+                <ul class="step-list">
+                    <li>Pergi ke tab <strong>Tetapan & T/Tangan</strong> ➔ Bahagian <strong>Pengurusan Data & Penyimpanan Awan</strong>.</li>
+                    <li>Klik butang <strong>Muat Turun Backup (.json)</strong> untuk menyimpan fail salinan ke dalam komputer atau pendrive anda.</li>
+                    <li>Pada komputer lain, buka web dan klik butang <strong>Muat Naik Backup (.json)</strong> untuk memulihkan keseluruhan catatan anda.</li>
+                </ul>
+            </section>
+
+            <!-- Section 9 -->
+            <section id="panduan-pdf" class="manual-section">
+                <h2><i class="fa-solid fa-sliders"></i> 9. Panduan Cetak A4 / PDF Kemas</h2>
+                <p>Untuk memastikan hasil cetakan kertas atau fail PDF anda kelihatan profesional dan tidak terpotong, pastikan tetapan dialog cetakan pelayar (Chrome/Edge/Firefox) diatur seperti berikut:</p>
+                <ul class="step-list">
+                    <li><strong>Destinasi (Destination)</strong>: Pilih pencetak fizikal anda atau <strong>Save as PDF / Microsoft Print to PDF</strong> untuk memuat turun dokumen.</li>
+                    <li><strong>Saiz Kertas (Paper Size)</strong>: Pastikan saiz dipilih adalah <strong>A4</strong>.</li>
+                    <li><strong>Margin (Margins)</strong>: Pilih <strong>Default</strong> (atau tetapkan kepada <em>Minimum</em> jika teks kelihatan terlalu rapat dengan sempadan kertas).</li>
+                    <li><strong>Skala (Scale)</strong>: Pilih <strong>100%</strong> (atau klik <em>Fit to page</em>).</li>
+                    <li><strong>Pengepala & Kaki (Headers and Footers)</strong>: <strong>Nyah-tanda (Uncheck)</strong> pilihan ini untuk menghilangkan cetakan URL web dan tarikh sistem di bahagian atas & bawah bucu kertas cetakan anda agar kelihatan kemas.</li>
+                    <li><strong>Grafik Latar Belakang (Background graphics)</strong>: <strong>Tanda (Check)</strong> pilihan ini untuk membolehkan garisan lorekan lembut pada jadual dipaparkan.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggler for Manual page
+        const themeToggle = document.getElementById("theme-toggle");
+        
+        // Sync theme with main app if stored
+        const savedTheme = localStorage.getItem("bdr_theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        updateToggleIcon(savedTheme);
+
+        themeToggle.addEventListener("click", () => {
+            let currentTheme = document.documentElement.getAttribute("data-theme");
+            let newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("bdr_theme", newTheme);
+            updateToggleIcon(newTheme);
+        });
+
+        function updateToggleIcon(theme) {
+            themeToggle.innerHTML = theme === "dark" 
+                ? '<i class="fa-solid fa-sun"></i> Cerah' 
+                : '<i class="fa-solid fa-moon"></i> Gelap';
+        }
+    </script>
+</body>
+</html>

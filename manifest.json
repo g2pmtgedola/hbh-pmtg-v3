@@ -1,0 +1,18 @@
+{
+  "name": "HBH PMTG - Sistem Log Harian BDR",
+  "short_name": "HBH PMTG",
+  "description": "Sistem Log Harian BDR Politeknik METrO Tasek Gelugor",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
