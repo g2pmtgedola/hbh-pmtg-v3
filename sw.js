@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hbh-pmtg-v2-fresh';
+const CACHE_NAME = 'hbh-pmtg-v2-word-20261027';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
