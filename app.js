@@ -51,7 +51,9 @@ const wfhDayWarning = document.getElementById("wfh-day-warning");
 const timetableStatusBody = document.getElementById("timetable-status-body");
 const saveLogBtn = document.getElementById("save-log-btn");
 const printDailyBtn = document.getElementById("print-daily-btn");
+const wordDailyBtn = document.getElementById("word-daily-btn");
 const printMonthlyBtn = document.getElementById("print-monthly-btn");
+const wordMonthlyBtn = document.getElementById("word-monthly-btn");
 const filterMonthInput = document.getElementById("filter-month");
 const historyTableBody = document.getElementById("history-table-body");
 const totalDaysCount = document.getElementById("total-days-count");
@@ -62,6 +64,7 @@ const printDailyDateSelect = document.getElementById("print-daily-date-select");
 const printDailyStatusBox = document.getElementById("print-daily-status-box");
 const printDailyStatusError = document.getElementById("print-daily-status-error");
 const printDailySelectedBtn = document.getElementById("print-daily-selected-btn");
+const wordDailySelectedBtn = document.getElementById("word-daily-selected-btn");
 const printMonthlyStatusBox = document.getElementById("print-monthly-status-box");
 const printMonthlyStatusText = document.getElementById("print-monthly-status-text");
 
@@ -190,7 +193,7 @@ function setupDateInputs() {
         printDailyDateSelect.value = todayStr;
     }
     
-    selectBestDefaultMonth();
+    filterMonthInput.value = `${yyyy}-${mm}`;
 }
 
 // Setup Event Listeners
@@ -227,7 +230,6 @@ function setupEventListeners() {
             hodDesignation: hodDesigInput.value.trim()
         };
         localStorage.setItem("bdr_profile", JSON.stringify(state.profile));
-        if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud(true);
         
         // Update sidebar and top fields
         document.querySelector(".profile-card h4").innerText = state.profile.name.split(" ")[0] || "USER";
@@ -241,10 +243,24 @@ function setupEventListeners() {
         triggerDailyPrint();
     });
 
+    // Word Daily Button
+    if (wordDailyBtn) {
+        wordDailyBtn.addEventListener("click", () => {
+            exportDailyWord(state.activeDate);
+        });
+    }
+
     // Print Monthly Button
     printMonthlyBtn.addEventListener("click", () => {
         triggerMonthlyPrint();
     });
+
+    // Word Monthly Button
+    if (wordMonthlyBtn) {
+        wordMonthlyBtn.addEventListener("click", () => {
+            exportMonthlyWord();
+        });
+    }
 
     // Month filter change updates history table and monthly print status
     filterMonthInput.addEventListener("change", () => {
@@ -265,6 +281,16 @@ function setupEventListeners() {
             const targetDate = printDailyDateSelect.value;
             if (targetDate) {
                 triggerDailyPrintForDate(targetDate);
+            }
+        });
+    }
+
+    // Daily Word button in history tab
+    if (wordDailySelectedBtn) {
+        wordDailySelectedBtn.addEventListener("click", () => {
+            const targetDate = printDailyDateSelect.value;
+            if (targetDate) {
+                exportDailyWord(targetDate);
             }
         });
     }
@@ -384,7 +410,7 @@ function setupEventListeners() {
     });
 
     // Hourly Attachment Listeners
-    const hoursList = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hoursList = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     hoursList.forEach(hr => {
         const itemRow = document.querySelector(`.timeline-item[data-hour="${hr}"]`);
         if (!itemRow) return;
@@ -392,44 +418,6 @@ function setupEventListeners() {
         const fileInput = itemRow.querySelector(".hour-attachment-input");
         const removeBtn = itemRow.querySelector(".remove-hour-attachment-btn");
         const preview = itemRow.querySelector(".hour-attachment-preview");
-
-// Helper function to compress evidence images before storing/cloud syncing
-function compressImageBase64(dataUrl, callback) {
-    if (!dataUrl || !dataUrl.startsWith("data:image")) {
-        return callback(dataUrl);
-    }
-    const img = new Image();
-    img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 600;
-
-        if (width > height) {
-            if (width > maxDim) {
-                height = Math.round((height * maxDim) / width);
-                width = maxDim;
-            }
-        } else {
-            if (height > maxDim) {
-                width = Math.round((width * maxDim) / height);
-                height = maxDim;
-            }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.6);
-        callback(compressedDataUrl);
-    };
-    img.onerror = () => {
-        callback(dataUrl);
-    };
-    img.src = dataUrl;
-}
 
         if (fileInput) {
             fileInput.addEventListener("change", (e) => {
@@ -445,22 +433,19 @@ function compressImageBase64(dataUrl, callback) {
 
                 const reader = new FileReader();
                 reader.onload = (evt) => {
-                    const rawDataUrl = evt.target.result;
-                    compressImageBase64(rawDataUrl, (compressedDataUrl) => {
-                        state.tempHourAttachments[hr] = {
-                            name: file.name,
-                            type: file.type.startsWith("image") ? "image/jpeg" : file.type,
-                            data: compressedDataUrl
-                        };
-                        if (preview) {
-                            preview.innerText = file.name;
-                            preview.title = file.name;
-                        }
-                        if (removeBtn) removeBtn.classList.remove("hidden");
-                        
-                        const label = hr < 12 ? `${hr}:00 AM` : (hr === 12 ? "12:00 PM" : `${hr-12}:00 PM`);
-                        showToast(`Lampiran jam ${label} berjaya dimuat naik!`);
-                    });
+                    state.tempHourAttachments[hr] = {
+                        name: file.name,
+                        type: file.type,
+                        data: evt.target.result
+                    };
+                    if (preview) {
+                        preview.innerText = file.name;
+                        preview.title = file.name;
+                    }
+                    if (removeBtn) removeBtn.classList.remove("hidden");
+                    
+                    const label = hr < 12 ? `${hr}:00 AM` : (hr === 12 ? "12:00 PM" : `${hr-12}:00 PM`);
+                    showToast(`Lampiran jam ${label} berjaya dimuat naik!`);
                 };
                 reader.readAsDataURL(file);
             });
@@ -469,18 +454,12 @@ function compressImageBase64(dataUrl, callback) {
         if (removeBtn) {
             removeBtn.addEventListener("click", () => {
                 if (fileInput) fileInput.value = "";
-                state.tempHourAttachments[hr] = null; // Mark explicitly as removed
-                if (state.logs[state.activeDate] && state.logs[state.activeDate][hr]) {
-                    delete state.logs[state.activeDate][hr].attachment;
-                }
+                delete state.tempHourAttachments[hr];
                 if (preview) preview.innerText = "";
                 removeBtn.classList.add("hidden");
                 
-                // Immediately save active date log to persist deletion to LocalStorage & Cloud
-                saveActiveDateLog();
-                
                 const label = hr < 12 ? `${hr}:00 AM` : (hr === 12 ? "12:00 PM" : `${hr-12}:00 PM`);
-                showToast(`Lampiran jam ${label} dibuang & diselaraskan.`);
+                showToast(`Lampiran jam ${label} dibuang.`);
             });
         }
     });
@@ -672,8 +651,8 @@ function loadActiveDateLog() {
     // Initialize temporary hourly attachments
     state.tempHourAttachments = {};
     
-    // Setup inputs for hours 8 to 17 (8:00 AM - 6:00 PM)
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    // Setup inputs for hours 8 to 16
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     
     hours.forEach(hr => {
         const itemRow = document.querySelector(`.timeline-item[data-hour="${hr}"]`);
@@ -785,8 +764,10 @@ function loadActiveDateLog() {
     // Check if daily print can be enabled
     if (savedLog) {
         printDailyBtn.removeAttribute("disabled");
+        if (wordDailyBtn) wordDailyBtn.removeAttribute("disabled");
     } else {
         printDailyBtn.setAttribute("disabled", "true");
+        if (wordDailyBtn) wordDailyBtn.setAttribute("disabled", "true");
     }
 }
 
@@ -823,7 +804,7 @@ function renderTimetableWidget(dayOfWeek) {
     }
 
     let html = '<div class="class-widget-list">';
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     
     hours.forEach(hr => {
         if (timetableDay[hr]) {
@@ -853,7 +834,7 @@ function formatHourRange(hr) {
 
 // Save Log Harian
 function saveActiveDateLog() {
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     const dailyData = {};
 
     hours.forEach(hr => {
@@ -873,20 +854,16 @@ function saveActiveDateLog() {
             desc: textarea.value.trim()
         };
 
-        if (state.tempHourAttachments[hr] !== undefined) {
-            if (state.tempHourAttachments[hr] !== null) {
-                dailyData[hr].attachment = state.tempHourAttachments[hr];
-            }
-        } else if (state.logs[state.activeDate] && state.logs[state.activeDate][hr] && state.logs[state.activeDate][hr].attachment) {
-            dailyData[hr].attachment = state.logs[state.activeDate][hr].attachment;
+        if (state.tempHourAttachments[hr]) {
+            dailyData[hr].attachment = state.tempHourAttachments[hr];
         }
     });
 
     state.logs[state.activeDate] = dailyData;
     localStorage.setItem("bdr_logs", JSON.stringify(state.logs));
-    if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud(true);
     
     printDailyBtn.removeAttribute("disabled");
+    if (wordDailyBtn) wordDailyBtn.removeAttribute("disabled");
     updateDashboardStats();
     updateHistoryTable();
     if (printDailyDateSelect) checkDailyPrintDateStatus(printDailyDateSelect.value);
@@ -899,136 +876,26 @@ function updateDashboardStats() {
     const logKeys = Object.keys(state.logs);
     totalDaysCount.innerText = logKeys.length;
     
-    // Total hours: each logged day represents 10 hours (8:00 AM - 6:00 PM)
-    totalHoursCount.innerText = logKeys.length * 10;
-}
-
-// Render Quick Month Filter Pills
-function renderRecordedMonthsBar() {
-    const pillsContainer = document.getElementById("recorded-months-pills");
-    if (!pillsContainer) return;
-    pillsContainer.innerHTML = "";
-
-    const logKeys = Object.keys(state.logs || {});
-    if (logKeys.length === 0) {
-        pillsContainer.innerHTML = `<span style="font-size: 0.75rem; color: var(--text-secondary);">Tiada sebarang rekod tersimpan di dalam akaun ini lagi.</span>`;
-        return;
-    }
-
-    // Group dates by YYYY-MM
-    const monthCounts = {};
-    logKeys.forEach(dateStr => {
-        const monthKey = dateStr.slice(0, 7); // "YYYY-MM"
-        monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
-    });
-
-    const sortedMonthKeys = Object.keys(monthCounts).sort((a, b) => b.localeCompare(a));
-    const activeValue = filterMonthInput ? filterMonthInput.value : "all";
-
-    // 1. "Semua Rekod" Pill
-    const allPill = document.createElement("button");
-    allPill.type = "button";
-    allPill.className = `btn btn-sm ${activeValue === 'all' ? 'btn-primary' : 'btn-secondary'}`;
-    allPill.style.fontSize = "0.75rem";
-    allPill.style.padding = "0.25rem 0.6rem";
-    allPill.style.borderRadius = "15px";
-    allPill.innerHTML = `<i class="fa-solid fa-folder"></i> Semua Rekod (${logKeys.length} Hari)`;
-    allPill.addEventListener("click", () => {
-        if (filterMonthInput) filterMonthInput.value = "all";
-        updateHistoryTable();
-        updateMonthlyPrintStatus();
-    });
-    pillsContainer.appendChild(allPill);
-
-    // 2. Individual Month Pills
-    sortedMonthKeys.forEach(mKey => {
-        const [y, m] = mKey.split("-");
-        const monthLabel = `${MONTH_NAMES[parseInt(m) - 1]} ${y}`;
-        const count = monthCounts[mKey];
-
-        const pill = document.createElement("button");
-        pill.type = "button";
-        pill.className = `btn btn-sm ${activeValue === mKey ? 'btn-primary' : 'btn-secondary'}`;
-        pill.style.fontSize = "0.75rem";
-        pill.style.padding = "0.25rem 0.6rem";
-        pill.style.borderRadius = "15px";
-        pill.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${monthLabel} (${count} Hari)`;
-        pill.addEventListener("click", () => {
-            if (filterMonthInput) filterMonthInput.value = mKey;
-            updateHistoryTable();
-            updateMonthlyPrintStatus();
-        });
-        pillsContainer.appendChild(pill);
-    });
-}
-
-// Auto select month with available logs if current month is empty
-function selectBestDefaultMonth() {
-    if (!filterMonthInput) return;
-    const today = new Date();
-    const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    
-    const logKeys = Object.keys(state.logs || {});
-    if (logKeys.length === 0) {
-        filterMonthInput.value = currentMonthKey;
-        return;
-    }
-
-    // If current month has logs, keep it. Otherwise default to most recent recorded month!
-    const currentMonthLogs = logKeys.filter(k => k.startsWith(currentMonthKey));
-    if (currentMonthLogs.length > 0) {
-        filterMonthInput.value = currentMonthKey;
-    } else {
-        const sortedMonths = Array.from(new Set(logKeys.map(k => k.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
-        filterMonthInput.value = sortedMonths[0] || "all";
-    }
+    // Total hours: each logged day represents 9 hours (8:00 AM - 5:00 PM)
+    totalHoursCount.innerText = logKeys.length * 9;
 }
 
 // Populate and Update History Table
 function updateHistoryTable() {
-    renderRecordedMonthsBar();
-
-    let filterMonth = filterMonthInput ? filterMonthInput.value : "all";
+    const filterMonth = filterMonthInput.value; // Format: YYYY-MM
     historyTableBody.innerHTML = "";
 
-    const logKeys = Object.keys(state.logs || {});
-    if (logKeys.length === 0) {
-        historyTableBody.innerHTML = `<tr><td colspan="5" class="text-center placeholder-text">Tiada rekod BDR tersimpan di dalam akaun ini lagi.</td></tr>`;
+    if (!filterMonth) {
+        historyTableBody.innerHTML = `<tr><td colspan="5" class="text-center placeholder-text">Sila pilih bulan tapis.</td></tr>`;
         return;
     }
 
-    let filteredKeys = [];
-    if (!filterMonth || filterMonth === "all") {
-        filteredKeys = logKeys.sort((a, b) => new Date(b) - new Date(a));
-    } else {
-        filteredKeys = logKeys
-            .filter(key => key.startsWith(filterMonth))
-            .sort((a, b) => new Date(b) - new Date(a));
-    }
+    const filteredKeys = Object.keys(state.logs)
+        .filter(key => key.startsWith(filterMonth))
+        .sort((a, b) => new Date(a) - new Date(b));
 
     if (filteredKeys.length === 0) {
-        const parts = filterMonth.split("-");
-        const monthName = parts.length === 2 ? `${MONTH_NAMES[parseInt(parts[1]) - 1]} ${parts[0]}` : filterMonth;
-        
-        const existingMonths = Array.from(new Set(logKeys.map(k => k.slice(0, 7))))
-            .map(mKey => {
-                const [y, m] = mKey.split("-");
-                return `${MONTH_NAMES[parseInt(m) - 1]} ${y}`;
-            }).join(", ");
-
-        historyTableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center" style="padding: 1.5rem;">
-                    <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">
-                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h4 style="margin-bottom: 0.25rem;">Tiada rekod bagi bulan ${monthName} lagi.</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        Data anda pada bulan lain (${existingMonths}) selamat tersimpan. Klik butang bulan di atas atau pilih "Semua Rekod" untuk menyemak & mencetak.
-                    </p>
-                </td>
-            </tr>
-        `;
+        historyTableBody.innerHTML = `<tr><td colspan="5" class="text-center placeholder-text">Tiada rekod BDR ditemui bagi bulan ${MONTH_NAMES[parseInt(filterMonth.split("-")[1]) - 1]} ${filterMonth.split("-")[0]}.</td></tr>`;
         return;
     }
 
@@ -1037,10 +904,11 @@ function updateHistoryTable() {
         const dayOfWeek = logDate.getDay();
         const dateFormatted = `${logDate.getDate()} ${MONTH_NAMES[logDate.getMonth()]} ${logDate.getFullYear()}`;
         
+        // Create summary string of activities
         const dailyLogs = state.logs[key];
         const categories = [];
         for (let hr in dailyLogs) {
-            if (dailyLogs[hr] && dailyLogs[hr].task && !categories.includes(dailyLogs[hr].task)) {
+            if (!categories.includes(dailyLogs[hr].task)) {
                 categories.push(dailyLogs[hr].task);
             }
         }
@@ -1051,10 +919,11 @@ function updateHistoryTable() {
             <td>${index + 1}</td>
             <td><strong>${dateFormatted}</strong></td>
             <td>${DAY_NAMES[dayOfWeek]}</td>
-            <td><span class="help-text">${categoriesStr || 'Tiada catatan'}</span></td>
+            <td><span class="help-text">${categoriesStr}</span></td>
             <td>
                 <button class="btn btn-secondary btn-icon" onclick="editLoggedDate('${key}')" title="Edit Log"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button class="btn btn-secondary btn-icon" onclick="triggerDailyPrintForDate('${key}')" title="Cetak Hari Ini"><i class="fa-solid fa-print"></i></button>
+                <button class="btn btn-secondary btn-icon" onclick="triggerDailyPrintForDate('${key}')" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
+                <button class="btn btn-secondary btn-icon" style="border-color: #2563eb; color: #2563eb;" onclick="exportDailyWord('${key}')" title="Muat Turun Word"><i class="fa-solid fa-file-word"></i></button>
                 <button class="btn btn-danger btn-icon" onclick="deleteLoggedDate('${key}')" title="Padam Log"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
@@ -1135,7 +1004,7 @@ function triggerDailyPrint() {
     const tableBody = document.getElementById("print-daily-activities-body");
     tableBody.innerHTML = "";
 
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     hours.forEach((hr, index) => {
         const timeRangeStr = formatHourRange(hr);
         const taskName = savedLog[hr] ? savedLog[hr].task : "";
@@ -1179,11 +1048,7 @@ function triggerDailyPrint() {
     document.body.classList.add("print-mode-daily");
     document.body.classList.remove("print-mode-monthly");
 
-    if (typeof executeSystemPrint === 'function') {
-        executeSystemPrint("print-daily-report", "Laporan_Harian_BDR_" + state.activeDate);
-    } else {
-        window.print();
-    }
+    window.print();
 
     // Clean up after print window closes
     setTimeout(() => {
@@ -1267,7 +1132,7 @@ function triggerMonthlyPrint() {
             <td style="text-align: center;">${index + 1}</td>
             <td style="text-align: center;"><strong>${dateStrFormatted}</strong></td>
             <td style="text-align: center;">${DAY_NAMES[dayOfWeek]}</td>
-            <td style="text-align: center;">${Object.keys(dailyLog).length} Jam</td>
+            <td style="text-align: center;">9 Jam</td>
             <td>${summaryText}</td>
         `;
         summaryTableBody.appendChild(trSummary);
@@ -1278,7 +1143,7 @@ function triggerMonthlyPrint() {
         dailySheetDiv.style.marginTop = "30px";
         
         let activitiesRows = "";
-        const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+        const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
         hours.forEach((hr, hrIndex) => {
             const timeRangeStr = formatHourRange(hr);
             const taskName = dailyLog[hr] ? dailyLog[hr].task : "";
@@ -1324,16 +1189,22 @@ function triggerMonthlyPrint() {
 
             <table class="info-table">
                 <tr>
-                    <td class="info-label">NAMA PEGAWAI</td>
-                    <td class="info-val">: ${state.profile.name.toUpperCase()}</td>
-                    <td class="info-label">HARI / TARIKH</td>
-                    <td class="info-val">: ${DAY_NAMES[dayOfWeek].toUpperCase()} (${dateStrFormatted})</td>
+                    <td class="info-label">Nama Pegawai</td>
+                    <td class="info-val">${state.profile.name.toUpperCase()}</td>
+                    <td class="info-label">Hari BDR</td>
+                    <td class="info-val">${DAY_NAMES[dayOfWeek]}</td>
                 </tr>
                 <tr>
-                    <td class="info-label">JAWATAN / GRED</td>
-                    <td class="info-val">: ${state.profile.designation}</td>
-                    <td class="info-label">WAKTU BEKERJA BDR</td>
-                    <td class="info-val">: 8:00 AM - 6:00 PM (10 Jam)</td>
+                    <td class="info-label">Jawatan / Gred</td>
+                    <td class="info-val">${state.profile.designation}</td>
+                    <td class="info-label">Tarikh BDR</td>
+                    <td class="info-val">${dateStrFormatted}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Bahagian/Jabatan</td>
+                    <td class="info-val">${state.profile.department}</td>
+                    <td class="info-label">Waktu Bekerja</td>
+                    <td class="info-val">8:00 AM - 5:00 PM (9 Jam)</td>
                 </tr>
             </table>
 
@@ -1382,75 +1253,12 @@ function triggerMonthlyPrint() {
     document.body.classList.add("print-mode-monthly");
     document.body.classList.remove("print-mode-daily");
 
-    if (typeof executeSystemPrint === 'function') {
-        executeSystemPrint("print-monthly-report", "Laporan_Bulanan_BDR_" + filterMonth);
-    } else {
-        window.print();
-    }
+    window.print();
 
     // Clean up after print window closes
     setTimeout(() => {
         document.body.classList.remove("print-mode-monthly");
     }, 1000);
-}
-
-// Helper function to execute print safely across Browsers, Mobile Devices, and Android WebViews (APK)
-function executeSystemPrint(elementId, filename) {
-    const isMobileOrAPK = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    const element = elementId ? document.getElementById(elementId) : null;
-
-    if (isMobileOrAPK && typeof html2pdf !== 'undefined' && element) {
-        showToast("📄 Menjana fail PDF Laporan...", "info");
-
-        // Save original styles
-        const origDisplay = element.style.display;
-        const origPos = element.style.position;
-        const origZIndex = element.style.zIndex;
-        const origBg = element.style.backgroundColor;
-
-        // Temporarily reveal element for html2canvas capture
-        element.style.display = "block";
-        element.style.position = "fixed";
-        element.style.top = "0";
-        element.style.left = "0";
-        element.style.width = "100%";
-        element.style.zIndex = "99999";
-        element.style.backgroundColor = "#ffffff";
-
-        const opt = {
-            margin:       [5, 5, 5, 5],
-            filename:     (filename || 'Laporan_BDR') + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save().then(() => {
-            element.style.display = origDisplay;
-            element.style.position = origPos;
-            element.style.zIndex = origZIndex;
-            element.style.backgroundColor = origBg;
-            showToast("✅ Fail PDF Laporan berjaya dimuat turun!");
-        }).catch(err => {
-            console.error("html2pdf error:", err);
-            element.style.display = origDisplay;
-            element.style.position = origPos;
-            element.style.zIndex = origZIndex;
-            element.style.backgroundColor = origBg;
-            window.print();
-        });
-    } else {
-        try {
-            if (window.AndroidPrint && typeof window.AndroidPrint.printPage === 'function') {
-                window.AndroidPrint.printPage();
-            } else {
-                window.print();
-            }
-        } catch (err) {
-            console.error("Print execution error:", err);
-            window.print();
-        }
-    }
 }
 
 // JSON Export functionality
@@ -1496,10 +1304,12 @@ function checkDailyPrintDateStatus(dateStr) {
         printDailyStatusBox.classList.remove("hidden");
         printDailyStatusError.classList.add("hidden");
         printDailySelectedBtn.removeAttribute("disabled");
+        if (wordDailySelectedBtn) wordDailySelectedBtn.removeAttribute("disabled");
     } else {
         printDailyStatusBox.classList.add("hidden");
         printDailyStatusError.classList.remove("hidden");
         printDailySelectedBtn.setAttribute("disabled", "true");
+        if (wordDailySelectedBtn) wordDailySelectedBtn.setAttribute("disabled", "true");
     }
 }
 
@@ -1509,6 +1319,7 @@ function updateMonthlyPrintStatus() {
     if (!filterMonth) {
         printMonthlyStatusBox.classList.add("hidden");
         printMonthlyBtn.setAttribute("disabled", "true");
+        if (wordMonthlyBtn) wordMonthlyBtn.setAttribute("disabled", "true");
         return;
     }
     const filteredKeys = Object.keys(state.logs).filter(key => key.startsWith(filterMonth));
@@ -1519,11 +1330,364 @@ function updateMonthlyPrintStatus() {
     if (count > 0) {
         printMonthlyStatusBox.classList.remove("hidden");
         printMonthlyBtn.removeAttribute("disabled");
+        if (wordMonthlyBtn) wordMonthlyBtn.removeAttribute("disabled");
     } else {
         printMonthlyStatusBox.classList.add("hidden");
         printMonthlyBtn.setAttribute("disabled", "true");
+        if (wordMonthlyBtn) wordMonthlyBtn.setAttribute("disabled", "true");
     }
 }
+
+// Helper to fetch logo.jpg as base64 DataURL so Word documents are 100% self-contained
+let cachedLogoBase64 = null;
+async function getLogoBase64() {
+    if (cachedLogoBase64) return cachedLogoBase64;
+    try {
+        const res = await fetch("logo.jpg");
+        if (!res.ok) return "";
+        const blob = await res.blob();
+        return await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                cachedLogoBase64 = reader.result;
+                resolve(cachedLogoBase64);
+            };
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        return "";
+    }
+}
+
+// Build single Daily Sheet HTML specifically structured for MS Word table layout
+function buildWordDailySheetHTML(dateKey, logoSrc, isDetailedMonthly = false) {
+    const savedLog = state.logs[dateKey];
+    const logDate = new Date(dateKey);
+    const dayOfWeek = logDate.getDay();
+    const dateStrFormatted = `${logDate.getDate()} ${MONTH_NAMES[logDate.getMonth()]} ${logDate.getFullYear()}`;
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
+
+    let activitiesRows = "";
+    hours.forEach((hr, index) => {
+        const timeRangeStr = formatHourRange(hr);
+        const taskName = savedLog[hr] ? savedLog[hr].task : "";
+        const taskDesc = savedLog[hr] ? savedLog[hr].desc : "";
+        const taskAttachment = (savedLog[hr] && savedLog[hr].attachment) ? savedLog[hr].attachment : null;
+
+        let formattedDesc = taskDesc.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+
+        if (taskAttachment) {
+            if (taskAttachment.type.startsWith("image/")) {
+                formattedDesc += `<br><div style="margin-top:6pt;"><img src="${taskAttachment.data}" height="95" style="height:95px; width:auto; border:1px solid #cccccc;"></div>`;
+            } else if (taskAttachment.type.startsWith("video/")) {
+                formattedDesc += `<br><span style="font-size:8.5pt; color:#475569;">[Bukti Video: ${taskAttachment.name}]</span>`;
+            }
+        }
+
+        activitiesRows += `
+            <tr>
+                <td width="6%" style="width:6%; border:1pt solid #000000; padding:5pt 6pt; text-align:center; vertical-align:top; font-size:10pt;">${index + 1}</td>
+                <td width="20%" style="width:20%; border:1pt solid #000000; padding:5pt 6pt; text-align:center; vertical-align:top; font-size:10pt; white-space:nowrap;">${timeRangeStr}</td>
+                <td width="24%" style="width:24%; border:1pt solid #000000; padding:5pt 6pt; text-align:left; vertical-align:top; font-size:10pt; font-weight:bold;">${taskName}</td>
+                <td width="50%" style="width:50%; border:1pt solid #000000; padding:5pt 6pt; text-align:left; vertical-align:top; font-size:10pt;">${formattedDesc}</td>
+            </tr>
+        `;
+    });
+
+    const sigImgHtml = state.signature
+        ? `<img src="${state.signature}" height="55" width="150" style="height:55px; width:150px; object-fit:contain;">`
+        : `<br><br><br>`;
+
+    const logoHtml = logoSrc
+        ? `<p style="margin:0 0 8pt 0; text-align:center;"><img src="${logoSrc}" height="60" style="height:60px; width:auto;"></p>`
+        : ``;
+
+    const reportTitle = isDetailedMonthly
+        ? "LAPORAN AKTIVITI BEKERJA DARI RUMAH (BDR) - PERINCIAN HARIAN"
+        : "LAPORAN AKTIVITI BEKERJA DARI RUMAH (BDR)";
+
+    return `
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border:none; margin-bottom:14pt;">
+            <tr>
+                <td style="text-align:center; border:none; border-bottom:2.25pt double #000000; padding-bottom:8pt;">
+                    ${logoHtml}
+                    <p style="margin:0; font-size:14pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">${reportTitle}</p>
+                    <p style="margin:3pt 0 0 0; font-size:11.5pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">${state.profile.institution.toUpperCase()}</p>
+                </td>
+            </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:14pt; font-family:'Times New Roman', serif;">
+            <tr>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Nama Pegawai</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.name.toUpperCase()}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Hari BDR</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${DAY_NAMES[dayOfWeek]}</td>
+            </tr>
+            <tr>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Jawatan / Gred</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.designation}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Tarikh BDR</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${dateStrFormatted}</td>
+            </tr>
+            <tr>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Bahagian/Jabatan</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.department}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Waktu Bekerja</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">8:00 AM - 5:00 PM (9 Jam)</td>
+            </tr>
+        </table>
+
+        <p style="margin:0 0 6pt 0; font-size:10.5pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">PERINCIAN AKTIVITI HARIAN</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:18pt; font-family:'Times New Roman', serif;">
+            <thead>
+                <tr>
+                    <th width="6%" style="width:6%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Bil</th>
+                    <th width="20%" style="width:20%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Waktu</th>
+                    <th width="24%" style="width:24%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Kategori Aktiviti</th>
+                    <th width="50%" style="width:50%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Perincian Tugasan / Catatan Pengajaran</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${activitiesRows}
+            </tbody>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border:none; margin-top:16pt; page-break-inside:avoid; font-family:'Times New Roman', serif;">
+            <tr>
+                <td width="48%" style="width:48%; border:none; vertical-align:top; text-align:left; padding:0;">
+                    <p style="margin:0 0 4pt 0; font-weight:bold; font-size:10pt;">Disediakan oleh:</p>
+                    <div style="height:60px; margin:4pt 0;">${sigImgHtml}</div>
+                    <p style="margin:0 0 2pt 0; font-weight:bold; font-size:10pt;">............................................................</p>
+                    <p style="margin:0; font-weight:bold; font-size:10pt; text-transform:uppercase;">${state.profile.name.toUpperCase()}</p>
+                    <p style="margin:1pt 0; font-size:9.5pt;">${state.profile.designation}</p>
+                    <p style="margin:1pt 0 0 0; font-size:9.5pt;">Tarikh: ${dateStrFormatted}</p>
+                </td>
+                <td width="4%" style="width:4%; border:none;"></td>
+                <td width="48%" style="width:48%; border:none; vertical-align:top; text-align:right; padding:0;">
+                    <p style="margin:0 0 4pt 0; font-weight:bold; font-size:10pt;">Disahkan oleh:</p>
+                    <div style="height:60px; margin:4pt 0;"><br><br><br></div>
+                    <p style="margin:0 0 2pt 0; font-weight:bold; font-size:10pt;">............................................................</p>
+                    <p style="margin:0; font-weight:bold; font-size:10pt; text-transform:uppercase;">${state.profile.hodName.toUpperCase()}</p>
+                    <p style="margin:1pt 0; font-size:9.5pt;">${state.profile.hodDesignation}</p>
+                    <p style="margin:1pt 0 0 0; font-size:9.5pt;">Tarikh: .......................................</p>
+                </td>
+            </tr>
+        </table>
+    `;
+}
+
+// Wrap body HTML in Microsoft Word XML & A4 Page Setup container and trigger download
+function triggerWordDownload(bodyHtml, filename) {
+    const fullWordHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>${filename}</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+    @page WordSection1 {
+        size: 21.0cm 29.7cm;
+        margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+        mso-header-margin: 1.0cm;
+        mso-footer-margin: 1.0cm;
+        mso-paper-source: 0;
+    }
+    div.WordSection1 {
+        page: WordSection1;
+    }
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 10.5pt;
+        color: #000000;
+        line-height: 1.3;
+    }
+    table {
+        border-collapse: collapse;
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+    }
+    p {
+        margin: 0;
+    }
+</style>
+</head>
+<body>
+<div class="WordSection1">
+${bodyHtml}
+</div>
+</body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', fullWordHtml], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+// Export Daily Report to Word (.doc)
+window.exportDailyWord = async function(dateKey) {
+    const targetDate = dateKey || state.activeDate;
+    const savedLog = state.logs[targetDate];
+    if (!savedLog) {
+        showToast("Tiada rekod disimpan bagi tarikh ini untuk dimuat turun.", "warning");
+        return;
+    }
+
+    const logoSrc = await getLogoBase64();
+    const sheetHtml = buildWordDailySheetHTML(targetDate, logoSrc, false);
+    const filename = `Laporan_Harian_BDR_${targetDate}.doc`;
+    triggerWordDownload(sheetHtml, filename);
+    showToast("Laporan Harian Word (.doc) berjaya dimuat turun!");
+};
+
+// Export Monthly Consolidated Report to Word (.doc)
+window.exportMonthlyWord = async function() {
+    const filterMonth = filterMonthInput.value; // YYYY-MM
+    if (!filterMonth) {
+        showToast("Sila pilih bulan dan tahun terlebih dahulu.", "warning");
+        return;
+    }
+
+    const filteredKeys = Object.keys(state.logs)
+        .filter(key => key.startsWith(filterMonth))
+        .sort((a, b) => new Date(a) - new Date(b));
+
+    if (filteredKeys.length === 0) {
+        showToast("Tiada rekod log ditemui bagi bulan yang dipilih.", "warning");
+        return;
+    }
+
+    const logoSrc = await getLogoBase64();
+    const monthParts = filterMonth.split("-");
+    const monthName = MONTH_NAMES[parseInt(monthParts[1]) - 1];
+    const yearStr = monthParts[0];
+    const monthlyPeriodStr = `${monthName} ${yearStr}`;
+
+    let summaryRowsHtml = "";
+    filteredKeys.forEach((key, index) => {
+        const logDate = new Date(key);
+        const dayOfWeek = logDate.getDay();
+        const dateStrFormatted = `${logDate.getDate()} ${MONTH_NAMES[logDate.getMonth()]} ${logDate.getFullYear()}`;
+        const dailyLog = state.logs[key];
+
+        const catMap = {};
+        for (let hr in dailyLog) {
+            let c = dailyLog[hr].task;
+            catMap[c] = (catMap[c] || 0) + 1;
+        }
+        const summaryTextParts = [];
+        for (let cat in catMap) {
+            summaryTextParts.push(`${cat} (${catMap[cat]} Jam)`);
+        }
+        const summaryText = summaryTextParts.join(", ");
+
+        summaryRowsHtml += `
+            <tr>
+                <td width="6%" style="width:6%; border:1pt solid #000000; padding:6pt; text-align:center; font-size:10pt;">${index + 1}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">${dateStrFormatted}</td>
+                <td width="14%" style="width:14%; border:1pt solid #000000; padding:6pt; text-align:center; font-size:10pt;">${DAY_NAMES[dayOfWeek]}</td>
+                <td width="12%" style="width:12%; border:1pt solid #000000; padding:6pt; text-align:center; font-size:10pt;">9 Jam</td>
+                <td width="50%" style="width:50%; border:1pt solid #000000; padding:6pt; text-align:left; font-size:10pt;">${summaryText}</td>
+            </tr>
+        `;
+    });
+
+    const sigImgHtml = state.signature
+        ? `<img src="${state.signature}" height="55" width="150" style="height:55px; width:150px; object-fit:contain;">`
+        : `<br><br><br>`;
+
+    const logoHtml = logoSrc
+        ? `<p style="margin:0 0 8pt 0; text-align:center;"><img src="${logoSrc}" height="60" style="height:60px; width:auto;"></p>`
+        : ``;
+
+    let combinedHtml = `
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border:none; margin-bottom:14pt;">
+            <tr>
+                <td style="text-align:center; border:none; border-bottom:2.25pt double #000000; padding-bottom:8pt;">
+                    ${logoHtml}
+                    <p style="margin:0; font-size:14pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">LAPORAN BULANAN AKTIVITI BEKERJA DARI RUMAH (BDR)</p>
+                    <p style="margin:3pt 0 0 0; font-size:11.5pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">${state.profile.institution.toUpperCase()}</p>
+                </td>
+            </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:14pt; font-family:'Times New Roman', serif;">
+            <tr>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Nama Pegawai</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.name.toUpperCase()}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Bulan Pelaporan</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${monthlyPeriodStr}</td>
+            </tr>
+            <tr>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Jawatan / Gred</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.designation}</td>
+                <td width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:5pt 8pt; font-weight:bold; font-size:10pt;">Bahagian/Jabatan</td>
+                <td width="32%" style="width:32%; border:1pt solid #000000; padding:5pt 8pt; font-size:10pt;">${state.profile.department}</td>
+            </tr>
+        </table>
+
+        <p style="margin:0 0 6pt 0; font-size:10.5pt; font-weight:bold; font-family:'Times New Roman', serif; text-transform:uppercase;">RINGKASAN PELAKSANAAN BDR BULANAN</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:18pt; font-family:'Times New Roman', serif;">
+            <thead>
+                <tr>
+                    <th width="6%" style="width:6%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Bil</th>
+                    <th width="18%" style="width:18%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Tarikh BDR</th>
+                    <th width="14%" style="width:14%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Hari</th>
+                    <th width="12%" style="width:12%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Jam BDR</th>
+                    <th width="50%" style="width:50%; border:1pt solid #000000; background-color:#f2f2f2; padding:6pt; text-align:center; font-weight:bold; font-size:10pt;">Ringkasan Aktiviti Utama</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${summaryRowsHtml}
+            </tbody>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border:none; margin-top:16pt; page-break-inside:avoid; font-family:'Times New Roman', serif;">
+            <tr>
+                <td width="48%" style="width:48%; border:none; vertical-align:top; text-align:left; padding:0;">
+                    <p style="margin:0 0 4pt 0; font-weight:bold; font-size:10pt;">Disediakan oleh:</p>
+                    <div style="height:60px; margin:4pt 0;">${sigImgHtml}</div>
+                    <p style="margin:0 0 2pt 0; font-weight:bold; font-size:10pt;">............................................................</p>
+                    <p style="margin:0; font-weight:bold; font-size:10pt; text-transform:uppercase;">${state.profile.name.toUpperCase()}</p>
+                    <p style="margin:1pt 0; font-size:9.5pt;">${state.profile.designation}</p>
+                    <p style="margin:1pt 0 0 0; font-size:9.5pt;">Tarikh: 30 ${monthName} ${yearStr}</p>
+                </td>
+                <td width="4%" style="width:4%; border:none;"></td>
+                <td width="48%" style="width:48%; border:none; vertical-align:top; text-align:right; padding:0;">
+                    <p style="margin:0 0 4pt 0; font-weight:bold; font-size:10pt;">Disahkan oleh:</p>
+                    <div style="height:60px; margin:4pt 0;"><br><br><br></div>
+                    <p style="margin:0 0 2pt 0; font-weight:bold; font-size:10pt;">............................................................</p>
+                    <p style="margin:0; font-weight:bold; font-size:10pt; text-transform:uppercase;">${state.profile.hodName.toUpperCase()}</p>
+                    <p style="margin:1pt 0; font-size:9.5pt;">${state.profile.hodDesignation}</p>
+                    <p style="margin:1pt 0 0 0; font-size:9.5pt;">Tarikh: .......................................</p>
+                </td>
+            </tr>
+        </table>
+    `;
+
+    // Append each daily sheet separated by an explicit MS Word page break
+    filteredKeys.forEach((key) => {
+        combinedHtml += `<br clear="all" style="page-break-before:always; mso-break-type:section-break">`;
+        combinedHtml += buildWordDailySheetHTML(key, logoSrc, true);
+    });
+
+    const filename = `Laporan_Bulanan_BDR_${monthName}_${yearStr}.doc`;
+    triggerWordDownload(combinedHtml, filename);
+    showToast(`Laporan Bulanan Word (${monthName} ${yearStr}) berjaya dimuat turun!`);
+};
 
 // Helper to parse CSV line, supporting quoted fields
 function parseCSVLine(line) {
@@ -1563,7 +1727,7 @@ function renderManualGridInputs() {
     const gridKhamis = document.getElementById("manual-grid-khamis");
     if (!gridSelasa || !gridKhamis) return;
 
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
     
     // Tuesday (Day 2)
     let selasaHtml = "";
@@ -1630,7 +1794,7 @@ function saveManualTimetable() {
 // Synchronize all saved logs with the active timetable
 function syncLogsWithActiveTimetable() {
     const isLecturer = state.profile.isLecturer;
-    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 
     for (let dateKey in state.logs) {
         const logDate = new Date(dateKey);
@@ -1675,453 +1839,3 @@ function syncLogsWithActiveTimetable() {
     }
     localStorage.setItem("bdr_logs", JSON.stringify(state.logs));
 }
-
-// --- Data Backup & Restore (JSON Export / Import) ---
-const exportJsonBtn = document.getElementById("export-json-btn");
-const importJsonBtn = document.getElementById("import-json-btn");
-const importJsonFile = document.getElementById("import-json-file");
-
-if (exportJsonBtn) {
-    exportJsonBtn.addEventListener("click", () => {
-        const backupData = {
-            version: "1.0",
-            exportDate: new Date().toISOString(),
-            profile: state.profile,
-            logs: state.logs,
-            timetable: state.timetable,
-            signature: state.signature
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `HBH_PMTG_Backup_${new Date().toISOString().slice(0, 10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-        showToast("Fail backup .json berjaya dimuat turun!");
-    });
-}
-
-if (importJsonBtn && importJsonFile) {
-    importJsonBtn.addEventListener("click", () => importJsonFile.click());
-    importJsonFile.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            try {
-                const imported = JSON.parse(evt.target.result);
-                if (imported.logs) state.logs = imported.logs;
-                if (imported.profile) state.profile = imported.profile;
-                if (imported.timetable) state.timetable = imported.timetable;
-                if (imported.signature) state.signature = imported.signature;
-
-                localStorage.setItem("bdr_logs", JSON.stringify(state.logs));
-                localStorage.setItem("bdr_profile", JSON.stringify(state.profile));
-                localStorage.setItem("bdr_timetable", JSON.stringify(state.timetable));
-                localStorage.setItem("bdr_signature", state.signature);
-
-                loadLocalStorageData();
-                if (logDateInput && logDateInput.value) {
-                    state.activeDate = logDateInput.value;
-                    loadActiveDateLog();
-                }
-                updateDashboardStats();
-                updateHistoryTable();
-                showToast("Data backup berjaya dimasukkan!");
-            } catch (err) {
-                alert("Ralat: Fail backup tidak sah!");
-            }
-        };
-        reader.readAsText(file);
-    });
-}
-
-// ==========================================
-// FIREBASE CLOUD SYNC & AUTHENTICATION SETUP
-// ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyDaZYfaLkXtfniOFA4EdOfDHngsSbdNffw",
-  authDomain: "hbh-pmtg-2.firebaseapp.com",
-  projectId: "hbh-pmtg-2",
-  storageBucket: "hbh-pmtg-2.firebasestorage.app",
-  messagingSenderId: "1096496691203",
-  appId: "1:1096496691203:web:9fee2c565fc78812bdb636",
-  measurementId: "G-87BRR9D33Q"
-};
-
-let auth = null;
-let db = null;
-let currentUser = null;
-
-if (typeof firebase !== 'undefined') {
-    try {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
-        console.log("Firebase Cloud initialized successfully.");
-    } catch (e) {
-        console.error("Firebase init error:", e);
-    }
-}
-
-// UI Elements for Cloud Sync
-const cloudAuthModal = document.getElementById("cloud-auth-modal");
-const closeCloudAuthModal = document.getElementById("close-cloud-auth-modal");
-const navCloudBtn = document.getElementById("nav-cloud-btn");
-const navCloudText = document.getElementById("nav-cloud-text");
-const cloudLoginBtn = document.getElementById("cloud-login-btn");
-
-const authLoggedOutView = document.getElementById("auth-logged-out-view");
-const authLoggedInView = document.getElementById("auth-logged-in-view");
-const authEmailInput = document.getElementById("auth-email");
-const authPasswordInput = document.getElementById("auth-password");
-const userDisplayEmail = document.getElementById("user-display-email");
-
-const doLoginBtn = document.getElementById("do-login-btn");
-const doRegisterBtn = document.getElementById("do-register-btn");
-const doLogoutBtn = document.getElementById("do-logout-btn");
-const syncNowBtn = document.getElementById("sync-now-btn");
-const saveNowBtn = document.getElementById("save-now-btn");
-
-function openCloudModal() {
-    if (cloudAuthModal) cloudAuthModal.classList.remove("hidden");
-}
-
-function closeCloudModal() {
-    if (cloudAuthModal) cloudAuthModal.classList.add("hidden");
-}
-
-if (navCloudBtn) navCloudBtn.addEventListener("click", openCloudModal);
-if (cloudLoginBtn) cloudLoginBtn.addEventListener("click", openCloudModal);
-if (closeCloudAuthModal) closeCloudAuthModal.addEventListener("click", closeCloudModal);
-
-// Firebase Auth State Observer
-if (auth) {
-    auth.onAuthStateChanged((user) => {
-        currentUser = user;
-        if (user) {
-            console.log("Logged in user:", user.email);
-            if (userDisplayEmail) userDisplayEmail.textContent = user.email;
-            if (navCloudText) navCloudText.textContent = user.email.split("@")[0];
-            if (authLoggedOutView) authLoggedOutView.classList.add("hidden");
-            if (authLoggedInView) authLoggedInView.classList.remove("hidden");
-            
-            const cloudBadge = document.getElementById("cloud-status-badge");
-            if (cloudBadge) {
-                cloudBadge.style.background = "#22c55e";
-                cloudBadge.style.color = "white";
-                cloudBadge.textContent = `☁️ Akaun Awan: ${user.email}`;
-            }
-            
-            // Auto fetch user data from Firestore on login
-            fetchUserDataFromCloud(user.uid);
-        } else {
-            if (navCloudText) navCloudText.textContent = "Log Masuk Awan";
-            if (authLoggedOutView) authLoggedOutView.classList.remove("hidden");
-            if (authLoggedInView) authLoggedInView.classList.add("hidden");
-            
-            const cloudBadge = document.getElementById("cloud-status-badge");
-            if (cloudBadge) {
-                cloudBadge.style.background = "#e2e8f0";
-                cloudBadge.style.color = "#475569";
-                cloudBadge.textContent = "⚡ Akaun Tempatan (LocalStorage)";
-            }
-        }
-    });
-}
-
-// Function to clear local state when logging out or switching accounts
-function clearLocalState() {
-    state.logs = {};
-    state.signature = "";
-    state.profile = {
-        name: "NAMA PEGAWAI",
-        designation: "Jawatan / Gred",
-        department: "Jabatan",
-        institution: "Politeknik METrO Tasek Gelugor",
-        hodName: "Ketua Jabatan",
-        hodDesignation: "Ketua Jabatan",
-        isLecturer: true
-    };
-    state.timetable = JSON.parse(JSON.stringify(TIMETABLE));
-
-    localStorage.removeItem("bdr_logs");
-    localStorage.removeItem("bdr_profile");
-    localStorage.removeItem("bdr_timetable");
-    localStorage.removeItem("bdr_signature");
-
-    loadLocalStorageData();
-    if (logDateInput && logDateInput.value) {
-        state.activeDate = logDateInput.value;
-        loadActiveDateLog();
-    }
-    updateDashboardStats();
-    updateHistoryTable();
-}
-
-// Helper to compress all evidence image attachments in state.logs before Cloud save
-async function compressLogsAttachments(logs) {
-    if (!logs) return {};
-    const clonedLogs = JSON.parse(JSON.stringify(logs));
-    
-    const compressPromise = (dataUrl) => {
-        return new Promise((resolve) => {
-            if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith("data:image")) {
-                return resolve(dataUrl);
-            }
-            // If already compressed (< 60KB Base64), keep as-is
-            if (dataUrl.length < 60000) {
-                return resolve(dataUrl);
-            }
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                let width = img.width;
-                let height = img.height;
-                const maxDim = 500;
-
-                if (width > height) {
-                    if (width > maxDim) {
-                        height = Math.round((height * maxDim) / width);
-                        width = maxDim;
-                    }
-                } else {
-                    if (height > maxDim) {
-                        width = Math.round((width * maxDim) / height);
-                        height = maxDim;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-
-                resolve(canvas.toDataURL("image/jpeg", 0.5));
-            };
-            img.onerror = () => resolve(dataUrl);
-            img.src = dataUrl;
-        });
-    };
-
-    for (const dateKey of Object.keys(clonedLogs)) {
-        const dayLog = clonedLogs[dateKey];
-        if (dayLog && typeof dayLog === 'object') {
-            for (const hrKey of Object.keys(dayLog)) {
-                const item = dayLog[hrKey];
-                if (item && item.attachment && item.attachment.data) {
-                    item.attachment.data = await compressPromise(item.attachment.data);
-                }
-            }
-        }
-    }
-    return clonedLogs;
-}
-
-// Function to save user state to Firestore Cloud
-async function saveUserDataToCloud(silent = false) {
-    if (!auth || !currentUser || !db) return;
-    try {
-        const userDocRef = db.collection("users").doc(currentUser.uid);
-        
-        // Auto-compress all attachments (including legacy uncompressed logs) before sending to Cloud
-        const cleanLogs = await compressLogsAttachments(state.logs);
-        const cleanProfile = JSON.parse(JSON.stringify(state.profile || {}));
-        const cleanTimetable = JSON.parse(JSON.stringify(state.timetable || {}));
-        const cleanSignature = state.signature || "";
-
-        // Update local state with compressed logs to save disk space
-        state.logs = cleanLogs;
-        localStorage.setItem("bdr_logs", JSON.stringify(state.logs));
-
-        await userDocRef.set({
-            email: currentUser.email,
-            profile: cleanProfile,
-            logs: cleanLogs,
-            timetable: cleanTimetable,
-            signature: cleanSignature,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        console.log("Cloud save success for:", currentUser.email);
-        if (!silent) showToast("☁️ Data & bukti berjaya disimpan ke Awan!");
-    } catch (err) {
-        console.error("Cloud save error:", err);
-        showToast("⚠️ Ralat Simpan Awan: " + err.message);
-        if (!silent) alert("Ralat menyimpan ke Awan: " + err.message);
-    }
-}
-
-// Function to fetch user state from Firestore Cloud
-async function fetchUserDataFromCloud(uid) {
-    if (!db) return;
-    try {
-        // Fetch latest server document bypassing local cache
-        const docSnap = await db.collection("users").doc(uid).get({ source: "server" }).catch(() => db.collection("users").doc(uid).get());
-        if (docSnap.exists) {
-            const data = docSnap.data();
-            // Replace local state cleanly with fetched cloud user data
-            state.logs = data.logs || {};
-            state.profile = data.profile || {
-                name: "NAMA PEGAWAI",
-                designation: "Jawatan / Gred",
-                department: "Jabatan",
-                institution: "Politeknik METrO Tasek Gelugor",
-                hodName: "Ketua Jabatan",
-                hodDesignation: "Ketua Jabatan",
-                isLecturer: true
-            };
-            state.timetable = data.timetable || JSON.parse(JSON.stringify(TIMETABLE));
-            state.signature = data.signature || "";
-
-            // Sync to localstorage for offline fallback
-            localStorage.setItem("bdr_logs", JSON.stringify(state.logs));
-            localStorage.setItem("bdr_profile", JSON.stringify(state.profile));
-            localStorage.setItem("bdr_timetable", JSON.stringify(state.timetable));
-            localStorage.setItem("bdr_signature", state.signature);
-
-            loadLocalStorageData();
-            if (logDateInput && logDateInput.value) {
-                state.activeDate = logDateInput.value;
-                loadActiveDateLog();
-            }
-            updateDashboardStats();
-            selectBestDefaultMonth();
-            updateHistoryTable();
-            showToast("☁️ Data akaun berjaya diselaras dari Awan!");
-        } else {
-            console.log("No cloud doc found for new user, initializing fresh empty state.");
-            clearLocalState();
-            saveUserDataToCloud(true);
-            showToast("☁️ Akaun baharu dimulakan!");
-        }
-    } catch (err) {
-        console.error("Cloud fetch error:", err);
-        if (err.message.includes("permission")) {
-            alert("⚠️ Firestore Security Rules belum diaktifkan! Sila tetapkan Rules kepada 'allow read, write: if request.auth != null;'\n\n" + err.message);
-        } else {
-            showToast("⚠️ Ralat Muat Data Awan: " + err.message);
-        }
-    }
-}
-
-// Auth Handlers
-if (doLoginBtn) {
-    doLoginBtn.addEventListener("click", async () => {
-        const email = authEmailInput.value.trim();
-        const pass = authPasswordInput.value.trim();
-        if (!email || !pass) return alert("Sila masukkan Emel dan Katalaluan.");
-        try {
-            await auth.signInWithEmailAndPassword(email, pass);
-            showToast("Log masuk Awan berjaya!");
-            closeCloudModal();
-        } catch (err) {
-            alert("Gagal Log Masuk: " + err.message);
-        }
-    });
-}
-
-if (doRegisterBtn) {
-    doRegisterBtn.addEventListener("click", async () => {
-        const email = authEmailInput.value.trim();
-        const pass = authPasswordInput.value.trim();
-        if (!email || !pass) return alert("Sila masukkan Emel dan Katalaluan.");
-        if (pass.length < 6) return alert("Katalaluan mestilah sekurang-kurangnya 6 aksara.");
-        try {
-            await auth.createUserWithEmailAndPassword(email, pass);
-            showToast("Akaun baharu berjaya didaftarkan di Awan!");
-            closeCloudModal();
-        } catch (err) {
-            alert("Gagal Mendaftar Akaun: " + err.message);
-        }
-    });
-}
-
-if (doLogoutBtn) {
-    doLogoutBtn.addEventListener("click", async () => {
-        if (auth) {
-            await auth.signOut();
-            clearLocalState();
-            showToast("Log keluar dari Awan & data dibersihkan.");
-            closeCloudModal();
-        }
-    });
-}
-
-if (syncNowBtn) {
-    syncNowBtn.addEventListener("click", () => {
-        if (currentUser) {
-            fetchUserDataFromCloud(currentUser.uid);
-        }
-    });
-}
-
-if (saveNowBtn) {
-    saveNowBtn.addEventListener("click", () => {
-        if (currentUser) {
-            saveUserDataToCloud(false);
-        }
-    });
-}
-
-// --- Mobile Side Panel Drawer Controls ---
-const openDrawerBtn = document.getElementById("open-drawer-btn");
-const closeDrawerBtn = document.getElementById("close-drawer-btn");
-const mobileDrawerOverlay = document.getElementById("mobile-drawer-overlay");
-const appSidebar = document.getElementById("app-sidebar");
-
-function openMobileDrawer() {
-    if (appSidebar) appSidebar.classList.add("drawer-open");
-    if (mobileDrawerOverlay) mobileDrawerOverlay.classList.add("active");
-}
-
-function closeMobileDrawer() {
-    if (appSidebar) appSidebar.classList.remove("drawer-open");
-    if (mobileDrawerOverlay) mobileDrawerOverlay.classList.remove("active");
-}
-
-if (openDrawerBtn) openDrawerBtn.addEventListener("click", openMobileDrawer);
-if (closeDrawerBtn) closeDrawerBtn.addEventListener("click", closeMobileDrawer);
-if (mobileDrawerOverlay) mobileDrawerOverlay.addEventListener("click", closeMobileDrawer);
-
-// Close drawer when menu items are clicked on mobile
-const drawerMenuItems = document.querySelectorAll(".menu-item");
-drawerMenuItems.forEach(item => {
-    item.addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-            closeMobileDrawer();
-        }
-    });
-});
-
-// Function to hide APK Download buttons when running inside Mobile / APK WebView
-function hideApkButtonsOnMobile() {
-    const isMobileOrAPK = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768 || window.location.protocol === "file:";
-    if (isMobileOrAPK) {
-        document.querySelectorAll('.apk-download-btn, .apk-download-card').forEach(el => {
-            el.style.display = 'none';
-            el.style.setProperty('display', 'none', 'important');
-        });
-    }
-}
-
-// Run immediately and on DOMContentLoaded / resize
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", hideApkButtonsOnMobile);
-} else {
-    hideApkButtonsOnMobile();
-}
-window.addEventListener("resize", hideApkButtonsOnMobile);
-
-// Force update Service Worker caches so new code is fetched from GitHub Pages
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-            registration.update();
-        }
-    });
-}
-
-
-

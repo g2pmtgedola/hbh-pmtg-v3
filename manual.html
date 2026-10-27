@@ -373,10 +373,6 @@
                     <li>Klik **Kosongkan Jadual** untuk memadam semua input jadual anda sekarang.</li>
                     <li>Klik **Reset Jadual Asal** jika anda ingin memadam tetapan tersuai dan mengembalikan jadual waktu kepada jadual asal Mohd Azrulnizam.</li>
                 </ul>
-                <div class="image-box">
-                    <img src="timetable.png" alt="Pratonton Tetapan Jadual Waktu BDR">
-                    <div class="image-caption">Rajah 2.1: Paparan bahagian konfigurasi peranan dan editor jadual waktu kuliah manual.</div>
-                </div>
             </section>
 
             <!-- Section 3 -->
@@ -392,81 +388,57 @@
                 </ul>
                 
                 <div class="image-box">
-                    <img src="dashboard_inputs.png" alt="Borang Log Harian BDR">
+                    <img src="assets/dashboard_inputs.png" alt="Borang Log Harian BDR">
                     <div class="image-caption">Rajah 3.1: Paparan borang pengisian aktiviti harian BDR dengan prapengisian jadual kelas automatik.</div>
                 </div>
             </section>
 
             <!-- Section 4 -->
             <section id="cetak-harian" class="manual-section">
-                <h2><i class="fa-solid fa-print"></i> 4. Mencetak Laporan Harian BDR</h2>
-                <p>Laporan harian dicetak mengikut format formal A4 rasmi institusi:</p>
+                <h2><i class="fa-solid fa-print"></i> 4. Mencetak & Memuat Turun Word Laporan Harian BDR</h2>
+                <p>Laporan harian boleh dicetak ke PDF/kertas atau dimuat turun dalam format <strong>Microsoft Word (.doc)</strong> mengikut susun atur rasmi A4 institusi tanpa lari format:</p>
                 <ul class="step-list">
-                    <li><strong>Cara A (Terus dari Dashboard)</strong>: Selepas mengisi dan menyimpan log, anda boleh terus menekan butang <strong>Cetak Harian</strong> di bucu kanan atas borang.</li>
-                    <li><strong>Cara B (Melalui tab Rekod & Cetakan)</strong>: Pilih tarikh laporan pada ruangan <strong>Pilih Tarikh Harian</strong>, kemudian klik butang <strong>Cetak Laporan Harian</strong>.</li>
-                    <li>Pelayar web anda akan membuka dialog cetakan. Anda boleh mencetak terus ke kertas atau menyimpan sebagai <strong>Save as PDF</strong>.</li>
+                    <li><strong>Cara A (Terus dari Dashboard)</strong>: Selepas mengisi dan menyimpan log, anda boleh terus menekan butang <strong>Cetak Harian</strong> (untuk PDF/Kertas) atau butang <strong>Word Harian</strong> (untuk fail Microsoft Word) di bucu kanan atas borang.</li>
+                    <li><strong>Cara B (Melalui tab Rekod & Cetakan)</strong>: Pilih tarikh laporan pada ruangan <strong>Pilih Tarikh Harian</strong>, kemudian klik butang <strong>Cetak PDF</strong> atau <strong>Muat Turun Word</strong>.</li>
+                    <li>Fail Word yang dimuat turun mengandungi logo rasmi, jadual penuh berkotak, bukti bergambar, serta tandatangan digital yang tersusun kemas dalam saiz halaman A4.</li>
                 </ul>
                 
                 <div class="image-box">
-                    <img src="print_daily.png" alt="Pratonton Cetakan Laporan Harian">
+                    <img src="assets/print_daily.png" alt="Pratonton Cetakan Laporan Harian">
                     <div class="image-caption">Rajah 4.1: Contoh hasil pratonton cetakan Laporan Harian BDR lengkap dengan kepala surat institusi dan tandatangan digital.</div>
                 </div>
             </section>
 
             <!-- Section 5 -->
             <section id="cetak-bulanan" class="manual-section">
-                <h2><i class="fa-solid fa-file-invoice"></i> 5. Mencetak Laporan Bulanan Lengkap</h2>
-                <p>Laporan bulanan menyatukan helaian ringkasan bulanan (summary sheet) dan semua laporan harian bagi bulan tersebut ke dalam satu fail cetakan:</p>
+                <h2><i class="fa-solid fa-file-invoice"></i> 5. Mencetak & Memuat Turun Word Laporan Bulanan Lengkap</h2>
+                <p>Laporan bulanan menyatukan helaian ringkasan bulanan (summary sheet) dan semua laporan harian bagi bulan tersebut ke dalam satu dokumen lengkap:</p>
                 <ul class="step-list">
                     <li>Pergi ke tab <strong>Rekod & Cetakan</strong>.</li>
                     <li>Di bawah bahagian **Cetakan Laporan Bulanan**, pilih bulan dan tahun pelaporan (contoh: <code>Ogos 2026</code>).</li>
-                    <li>Sistem akan memaparkan bilangan hari BDR yang telah direkodkan. Klik **Cetak Laporan Bulanan**.</li>
-                    <li>Sistem akan menjana satu dokumen komprehensif mengandungi halaman ringkasan bulanan di bahagian depan, diikuti lampiran helaian harian bagi setiap tarikh tersebut (dipisahkan secara halaman baharu menggunakan <em>page-break</em>).</li>
+                    <li>Sistem akan memaparkan bilangan hari BDR yang telah direkodkan. Klik **Cetak PDF** atau **Muat Turun Word**.</li>
+                    <li>Sistem akan menjana satu dokumen komprehensif (PDF atau `.doc`) mengandungi halaman ringkasan bulanan di bahagian depan, diikuti lampiran helaian harian bagi setiap tarikh tersebut yang dipisahkan secara automatik mengikut muka surat baharu (<em>page-break</em>).</li>
                 </ul>
                 
                 <div class="image-box">
-                    <img src="print_monthly.png" alt="Pratonton Cetakan Laporan Bulanan">
+                    <img src="assets/print_monthly.png" alt="Pratonton Cetakan Laporan Bulanan">
                     <div class="image-caption">Rajah 5.1: Contoh halaman ringkasan (Summary Sheet) Laporan Bulanan sebelum helaian perperincian BDR harian dilampirkan.</div>
                 </div>
             </section>
 
             <!-- Section 6 -->
-            <section id="penyimpanan-awan" class="manual-section">
-                <h2><i class="fa-solid fa-cloud"></i> 6. Penyimpanan Awan Automatik (Firebase Cloud Sync)</h2>
-                <p>Dalam HBH PMTG V2.0, sistem disepadukan secara langsung dengan <strong>Google Firebase Cloud Database</strong> untuk membolehkan penyelarasan data log harian secara automatik merentasi semua peranti (Laptop, PC Pejabat, dan Telefon Bimbit):</p>
+            <section id="migrasi" class="manual-section">
+                <h2><i class="fa-solid fa-right-from-bracket"></i> 6. Migrasi Data (Eksport / Import) Pejabat ke Rumah</h2>
+                <p>Oleh kerana sistem ini menyimpan data secara setempat, anda perlu menggunakan fungsi eksport/import untuk memindahkan data catatan anda jika anda bertukar komputer (cth: dari PC pejabat ke laptop rumah):</p>
                 <ul class="step-list">
-                    <li><strong>Pendaftaran & Log Masuk</strong>: Klik butang <code>☁️ Log Masuk Awan</code> pada bar navigasi atas. Masukkan alamat emel dan katalaluan anda untuk mendaftar akaun baharu atau log masuk akaun sedia ada.</li>
-                    <li><strong>Penyelarasan Data Automatik (Auto-Sync)</strong>: Setiap kali anda menekan butang <strong>Simpan Log Harian</strong> atau mengemas kini maklumat profil di mana-mana komputer, data tersebut akan dihantar secara senyap dan selamat ke Awan Firebase.</li>
-                    <li><strong>Akses Dari Peranti Lain</strong>: Apabila anda membuka sistem di komputer atau telefon bimbit lain, cuma log masuk menggunakan emel yang sama. Semua rekod log BDR, profil, jadual waktu, dan tanda tangan digital anda akan dimuat turun serta-merta!</li>
-                    <li><strong>Pengasingan Data Akaun 100%</strong>: Setiap pengguna mempunyai ruang storan Awan berasingan (*User UID Isolation*). Pensyarah atau pengguna lain tidak boleh melihat atau mengusik data catatan anda.</li>
+                    <li><strong>Langkah 1 (Eksport dari Pejabat)</strong>: Pada PC pejabat anda, pergi ke tab **Rekod & Cetakan**. Klik butang **Eksport Data** di sebelah kanan atas. Fail sandaran berformat <code>.json</code> akan dimuat turun. Salin fail ini ke dalam pendrive anda bersama-sama folder <code>sistem BDR</code>.</li>
+                    <li><strong>Langkah 2 (Import di Rumah)</strong>: Buka fail <code>run.bat</code> di PC rumah anda. Pergi ke tab **Rekod & Cetakan** dan klik butang **Import Data**. Pilih fail <code>.json</code> yang dibawa tadi. Semua catatan dan tandatangan anda akan dipulihkan secara automatik!</li>
                 </ul>
             </section>
 
             <!-- Section 7 -->
-            <section id="muat-turun-apk" class="manual-section">
-                <h2><i class="fa-solid fa-mobile-screen-button"></i> 7. Aplikasi Mobile Android (.APK)</h2>
-                <p>Untuk memudahkan capaian dan pengisian log BDR di mana sahaja menggunakan telefon bimbit, aplikasi Android rasmi (.APK) telah disediakan:</p>
-                <ul class="step-list">
-                    <li><strong>Muat Turun APK</strong>: Anda boleh menekan butang <strong>Muat Turun APK Android</strong> pada bar navigasi atas atau menerusi kad di Dashboard Utama untuk memuat turun fail <code>HBH_PMTG_v2.apk</code>.</li>
-                    <li><strong>Pemasangan Di Telefon</strong>: Hantar fail <code>.apk</code> tersebut ke telefon bimbit anda dan tekan fail tersebut untuk memasang (Install). Jika skrin keselamatan telefon meminta kebenaran, pilih <em>Allow from this source / Allow installation</em>.</li>
-                    <li><strong>Penggunaan</strong>: Selepas dipasang, buka aplikasi HBH PMTG di telefon, klik butang <code>☁️ Log Masuk Awan</code> dan log masuk. Anda boleh menambah atau menyemak log BDR secara terus dari telefon bimbit anda!</li>
-                </ul>
-            </section>
-
-            <!-- Section 8 -->
-            <section id="migrasi" class="manual-section">
-                <h2><i class="fa-solid fa-file-export"></i> 8. Backup & Restore Manual (Fail JSON)</h2>
-                <p>Sebagai langkah keselamatan tambahan atau kegunaan tanpa talian internet (offline), anda juga boleh menggunakan fungsi backup manual berformat <code>.json</code>:</p>
-                <ul class="step-list">
-                    <li>Pergi ke tab <strong>Tetapan & T/Tangan</strong> ➔ Bahagian <strong>Pengurusan Data & Penyimpanan Awan</strong>.</li>
-                    <li>Klik butang <strong>Muat Turun Backup (.json)</strong> untuk menyimpan fail salinan ke dalam komputer atau pendrive anda.</li>
-                    <li>Pada komputer lain, buka web dan klik butang <strong>Muat Naik Backup (.json)</strong> untuk memulihkan keseluruhan catatan anda.</li>
-                </ul>
-            </section>
-
-            <!-- Section 9 -->
             <section id="panduan-pdf" class="manual-section">
-                <h2><i class="fa-solid fa-sliders"></i> 9. Panduan Cetak A4 / PDF Kemas</h2>
+                <h2><i class="fa-solid fa-sliders"></i> 7. Panduan Cetak A4 / PDF Kemas</h2>
                 <p>Untuk memastikan hasil cetakan kertas atau fail PDF anda kelihatan profesional dan tidak terpotong, pastikan tetapan dialog cetakan pelayar (Chrome/Edge/Firefox) diatur seperti berikut:</p>
                 <ul class="step-list">
                     <li><strong>Destinasi (Destination)</strong>: Pilih pencetak fizikal anda atau <strong>Save as PDF / Microsoft Print to PDF</strong> untuk memuat turun dokumen.</li>
